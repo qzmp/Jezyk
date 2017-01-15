@@ -9,8 +9,6 @@ import javax.xml.parsers.DocumentBuilder;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -18,7 +16,6 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Scanner;
 import java.util.stream.Stream;
 
 /**
@@ -47,8 +44,11 @@ public class StatisticsBuilder {
         try(Stream<Path> paths = Files.walk(Paths.get(path))) {
             paths.forEach(filePath -> {
                 if (Files.isRegularFile(filePath)) {
-                    results.add(new Pair(filePath.getFileName(), countStatistics(filePath.toString(), desiredTags)));
+                    results.add(new Pair(filePath.getFileName().toString(), countStatistics(filePath.toString(), desiredTags)));
                     System.out.println(filePath);
+                    //System.out.println(filePath.getFileName());
+                   // System.out.println(results.get(0).getValue().keySet());
+                   // System.out.println(results.get(0).getValue().get("dzisiaj"));
                 }
             });
         }
@@ -71,8 +71,8 @@ public class StatisticsBuilder {
 
             // normalize text representation
             doc.getDocumentElement ().normalize ();
-            System.out.println ("Root element of the doc is " +
-                    doc.getDocumentElement().getNodeName());
+            //System.out.println ("Root element of the doc is " +
+                 //   doc.getDocumentElement().getNodeName());
 
             NodeList listOfTokens = doc.getElementsByTagName("tok");
             int tokenCount = listOfTokens.getLength();
@@ -124,7 +124,9 @@ public class StatisticsBuilder {
         StatisticsBuilder sb = new StatisticsBuilder();
         //sb.getScanner("out.xml");
         //sb.countStatistics("data/out.xml", new String[]{"pred","conj","qub"});
-        sb.countStatisticsFolder("data/", new String[]{"pred","conj","qub"});
+        //sb.countStatisticsFolder("data/deotyma_zagadka_1879.txt.tag/", new String[]{"pred","prep","ppron","conj","qub"});
+        DataConverter.convert(sb.countStatisticsFolder("data/", new String[]{"pred","prep","ppron","conj"}));
+        DataConverter.saveConvertedDataToFile();
     }
 
 }
