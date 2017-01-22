@@ -121,12 +121,19 @@ public class StatisticsBuilder {
     }
 
     public static void main(String [] args){
-        StatisticsBuilder sb = new StatisticsBuilder();
         //sb.getScanner("out.xml");
         //sb.countStatistics("data/out.xml", new String[]{"pred","conj","qub"});
         //sb.countStatisticsFolder("data/deotyma_zagadka_1879.txt.tag/", new String[]{"pred","prep","ppron","conj","qub"});
-        DataConverter.convert(sb.countStatisticsFolder("data/", new String[]{"pred","prep","ppron","conj"}));
-        DataConverter.saveConvertedDataToFile();
+       DataConverter.convert(new StatisticsBuilder().countStatisticsFolder("data/", new String[]{"pred","prep","ppron","conj","qub"}));
+       DataConverter.saveConvertedDataToFile("data");
+    	
+    	Classifier cF = new Classifier();
+        cF.loadDataFromFile("data2.csv");
+        cF.discretizeData();
+        cF.classifyData(ClassifierType.AdaBoostWithBayes, 3);
+        
+      //cF.saveDataToFileArff();
+        
     }
 
 }
