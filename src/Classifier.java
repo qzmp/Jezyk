@@ -3,17 +3,21 @@ import weka.core.Instances;
 import weka.core.converters.ArffSaver;
 import weka.core.converters.ConverterUtils.DataSource;
 import weka.classifiers.bayes.*;
+import weka.classifiers.functions.MultilayerPerceptron;
 import weka.classifiers.functions.SMO;
 import weka.classifiers.meta.AdaBoostM1;
 import weka.classifiers.Evaluation;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Random;
 
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Discretize;
 import weka.classifiers.trees.J48;
-
+import weka.classifiers.trees.RandomForest;
 
 enum ClassifierType
 {
@@ -23,6 +27,7 @@ enum ClassifierType
 public class Classifier 
 {
 	private Instances data;
+	public String fileNameToSave = "results.csv";
 	
 	public void loadDataFromFile(String fileName)
 	{
@@ -65,6 +70,20 @@ public class Classifier
 		{e.printStackTrace();}
 	}
 	
+	public void saveResultsToFile(String path, String result)
+	{
+		try {
+			BufferedWriter dataFileWriter = new BufferedWriter(new FileWriter(path, true));
+
+			dataFileWriter.write("\n" + result + "\n");
+			
+			dataFileWriter.close();
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public void classifyData(ClassifierType classifierType, int folds)
 	{
 		try
@@ -98,13 +117,14 @@ public class Classifier
 					
 					AdaBoostM1 ada = new AdaBoostM1();
 					ada.setClassifier(new NaiveBayes());
+					ada.setNumIterations(50);
 					eval.crossValidateModel(ada, data, folds, new Random(1));
 					
 					break;
-				
 			}
 			
-			System.out.println(eval.toSummaryString("\nResults\n======\n", false));
+			//System.out.println(eval.toSummaryString("\nResults\n======\n", false));
+			saveResultsToFile(fileNameToSave, "\n" + classifierType.toString() + "\n" + eval.toSummaryString("\nResults\n======\n", false));
 		}
 		
 		catch(Exception e)

@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -124,14 +126,49 @@ public class StatisticsBuilder {
         //sb.getScanner("out.xml");
         //sb.countStatistics("data/out.xml", new String[]{"pred","conj","qub"});
         //sb.countStatisticsFolder("data/deotyma_zagadka_1879.txt.tag/", new String[]{"pred","prep","ppron","conj","qub"});
-       DataConverter.convert(new StatisticsBuilder().countStatisticsFolder("data/", new String[]{"pred","prep","ppron","conj","qub"}));
-       DataConverter.saveConvertedDataToFile("data");
+      
+    	List<String[]> functorsConf = new ArrayList<>();
     	
+    	functorsConf.addAll(Arrays.asList(
+    			new String[] {"pred","prep","ppron","conj","qub"},
+    			new String[] {"pred","prep","ppron","conj"},
+    			new String[] {"pred","prep","ppron","qub"},
+    			new String[] {"pred","prep","conj","qub"},
+    			new String[] {"pred","ppron","conj","qub"},
+    			new String[] {"prep","ppron","conj","qub"}));
+
+    	List<String> fileNames = new ArrayList<>();
+    	
+    	for(String[] conf : functorsConf)
+    	{
+        	DataConverter.convert(new StatisticsBuilder().countStatisticsFolder("data/", conf));
+        	
+        	String fileName = "data";
+        	for(String functor : conf)
+        		fileName += "_" + functor; 
+        	
+        	fileNames.add(fileName + ".csv");
+        		
+            DataConverter.saveConvertedDataToFile(fileName);
+    	}
+    	
+    	ClassifierType[] cT = {ClassifierType.Bayes,ClassifierType.C45,ClassifierType.AdaBoostWithBayes, ClassifierType.SVM};
+    	//ClassifierType[] cT = {ClassifierType.AdaBoostWithBayes};
     	Classifier cF = new Classifier();
-        cF.loadDataFromFile("data2.csv");
-        cF.discretizeData();
-        cF.classifyData(ClassifierType.AdaBoostWithBayes, 3);
-        
+    	
+    	for(String fileName : fileNames)
+    	{
+        	for(ClassifierType ct : cT)
+        	{
+                cF.loadDataFromFile(fileName);
+                
+                if(ct.equals(ClassifierType.Bayes) || ct.equals(ClassifierType.AdaBoostWithBayes))
+                	cF.discretizeData();
+                
+                cF.fileNameToSave = "results_" + fileName;
+                cF.classifyData(ct, 3);
+        	}
+    	}   
       //cF.saveDataToFileArff();
         
     }
